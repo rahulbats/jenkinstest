@@ -6,6 +6,7 @@ names=($gitdiff)      # split the `names` string into an array by the same name
 IFS=$SAVEIFS   # Restore original IFS
 echo "this is inside script"+${1}
 
+
 for name in "${names[@]}"
 do
     echo name
