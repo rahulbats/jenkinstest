@@ -12,10 +12,10 @@ pipeline {
                     echo "this is the git revision "+env.TAG
                     env.PREVTAG = sh (script: "printf \$(git rev-parse HEAD~1)", returnStdout: true)
 
-                    gitdiff = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
-                    echo $gitdiff
+                    env.gitdiff = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
+                    echo $env.gitdiff
                     sh ('chmod 777 script.sh')
-                    sh ('./script.sh '+$gitdiff)    
+                    sh ('./script.sh '+$env.gitdiff)    
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
 
