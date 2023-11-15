@@ -13,7 +13,7 @@ pipeline {
                     env.PREVTAG = sh (script: "printf \$(git rev-parse HEAD~1)", returnStdout: true)
 
                     env.GITDIFF = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
-                    chmod 777 script.sh
+                    sh ('chmod 777 script.sh')
                     sh ('./script.sh')    
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
