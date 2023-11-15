@@ -7,27 +7,67 @@ pipeline {
             steps {
                script {
                 
-                
-                def userInput = input(
-                 id: 'userInput', message: 'Let\'s promote?', parameters: [
-                 [$class: 'TextParameterDefinition', defaultValue: 'uat', description: 'Environment', name: 'env'],
-                 [$class: 'TextParameterDefinition', defaultValue: 'uat1', description: 'Target', name: 'target']
-                ])
-                
-                echo "this is userinput ${userInput['env']}"
                
-                def output = readFile file: "/Users/rahul/inputfile.txt"
-                def outputjson = readJSON file: "/Users/rahul/inputfile.json"
-                for (ii = 0; ii < outputjson.projects.project.size(); ii++)
-                    echo outputjson.projects.project[ii].name
-                echo outputjson.projects.project[1].name
-                echo output
-                def response = sh(script: 'curl http://www.example.org/', returnStdout: true)
-                echo response
+               
+                    List<String> changes = getChangedFilesList()
+                    println ("Changed file list: " + changes)
+
+                    String gitCommitId = getGitcommitID()
+                    println("GIT CommitID: " + gitCommitID)
+
+                    String gitCommitAuthorName = getAuthorName()
+                    println("GIT CommitAuthorName: " + gitCommitAuthorName)
+
+                    String gitCommitMessage = getCommitMessage()
+                    println("GIT CommitMessage: " + gitCommitMessage)
                 }
             }
             }
         }
     
+}
+
+@NonCPS
+List<String> getChangedFilesList(){
+    def changedFiles = []
+    for ( changeLogSet in currentBuild.changeSets){
+        for (entry in changeLogSet.getItems()){
+            changedFiles.addAll(entry.affectedPaths)
+        }
+    }
+    return changedFiles
+}
+
+@NonCPS
+String getGitcommitID(){
+    gitCommitID = " "
+    for ( changeLogSet in currentBuild.changeSets){
+        for (entry in changeLogSet.getItems()){
+            gitCommitID = entry.commitId
+        }
+    }
+    return gitCommitID
+}
+
+@NonCPS
+String getAuthorName(){
+    gitAuthorName = " "
+    for ( changeLogSet in currentBuild.changeSets){
+        for (entry in changeLogSet.getItems()){
+            gitAuthorName = entry.authorName
+        }
+    }
+    return gitAuthorName
+}
+
+@NonCPS
+String getCommitMessage(){
+    commitMessage = " "
+    for ( changeLogSet in currentBuild.changeSets){
+        for (entry in changeLogSet.getItems()){
+            commitMessage = entry.msg
+        }
+    }
+    return commitMessage
 }
 
