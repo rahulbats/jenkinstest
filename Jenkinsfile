@@ -14,7 +14,7 @@ pipeline {
 
                     env.GITDIFF = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
                     chmod 777 script.sh
-                    ./script.sh    
+                    sh ('./script.sh')    
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
 
