@@ -7,8 +7,9 @@ pipeline {
             steps {
                script {
                 
-               
-               
+                    
+                    env.TAG = sh (script: "printf \$(git rev-parse HEAD)", returnStdout: true)     
+                    echo "this is the git revision "+env.TAG
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
 
