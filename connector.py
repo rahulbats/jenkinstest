@@ -31,10 +31,12 @@ for name in names:
                print("updating connector "+connectorName)
                jsonFile=open(file[1])
                jsonstring=jsonFile.read()
+               print("this is the json string before replace "+jsonstring)
                jsonstring=jsonstring.format(user=os.getenv('user')) 
+
                #data = json.load(jsonstring)  
                
-               print(jsonstring)   
+               print("this is the json string after replace "+jsonstring)   
                headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
                r = requests.put(connectorurl+connectorName+"/config", data=jsonstring, headers=headers)
                print(r) 
