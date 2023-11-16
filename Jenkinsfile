@@ -16,7 +16,7 @@ pipeline {
                     echo env.gitdiff
                     sh ('chmod 777 script.sh')
                     sh ("./script.sh \"${env.gitdiff}\"")    
-                    sh ('python connector.py')
+                    sh ('/usr/local/bin/python connector.py')
 
 
                     
