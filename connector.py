@@ -1,2 +1,3 @@
 import os
-USER = os.getenv('API_USER')
+gitdiff = os.getenv('gitdiff')
+print(gitdiff)
