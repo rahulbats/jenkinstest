@@ -26,12 +26,12 @@ for name in names:
          elif file[0]=='A' or file[0]=='M': 
             
             if file[0]=='A': 
-               print("creating connector"+connectorName)
+               print("creating connector "+connectorName)
             else:
-               print("updating connector"+connectorName)
+               print("updating connector "+connectorName)
                jsonFile=open(file[1])
-               jsonstring = jsonFile.read()
-               jsonstring.format(user=os.getenv('user')) 
+               jsonstring=jsonFile.read()
+               jsonstring=jsonstring.format(user=os.getenv('user')) 
                #data = json.load(jsonstring)  
                
                print(jsonstring)   
