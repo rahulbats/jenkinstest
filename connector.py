@@ -8,7 +8,8 @@ names=gitdiff.split("\n")
 connectorurl="http://localhost:8083/connectors/"
 
 user=os.getenv('user')
-
+for name, value in os.environ.items():
+    print("{0}: {1}".format(name, value))
 
 for name in names:
   print(name)
