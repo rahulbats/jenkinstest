@@ -34,13 +34,10 @@ for name in names:
             jsonstring=string.Template(jsonFile.read())
             jsonstring=jsonstring.substitute(**os.environ)
 
-            
-            #data = json.load(jsonstring)  
-            
             print("final topic json "+jsonstring)   
             
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-            r = requests.put(restTopicURL, data=jsonstring, headers=headers)
+            r = requests.post(restTopicURL, data=jsonstring, headers=headers)
             print(r)    
 
       if "connector-definitions" in file[1]:
@@ -61,7 +58,6 @@ for name in names:
             jsonstring=string.Template(jsonFile.read())
             jsonstring=jsonstring.substitute(**os.environ)
             
-            #data = json.load(jsonstring)  
             
             print("final connector json "+jsonstring)   
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
