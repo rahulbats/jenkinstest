@@ -12,18 +12,19 @@ for name in names:
   file= name.split("\t")
   try:
       print(file[0]+"-"+file[1])
-      if file[1]=='Jenkinsfile' or file[1]=='connector.py' or file[1]=='sc':
+      if "connector-definitions" not in file[1]:
          print('continuing for'+file[1])
          continue
-     
+      else:
+         connectorName = file[1].replace(".json","").replace("connector-definitions/","")
          if file[0]=='D': 
-            connectorName = file[1].replace("json","")
+            
             print("deleting connector"+connectorName)
             r=requests.delete(connectorurl+connectorName)
             print(r)
           
          elif file[0]=='A' or file[0]=='M': 
-            connectorName = file[1].replace(".json","")
+            
             if file[0]=='A': 
                print("creating connector"+connectorName)
             else:

@@ -1,4 +1,5 @@
 {
+        
         "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector", 
         "kafka.topic" : "jenkins",
         "value.converter": "org.apache.kafka.connect.json.JsonConverter",
