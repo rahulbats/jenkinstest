@@ -16,9 +16,8 @@ pipeline {
                     echo env.gitdiff
                     sh ('chmod 777 script.sh')
                     sh ("./script.sh \"${env.gitdiff}\"")    
-
-                    python connector.py
-
+                    sh 'python connector.py'
+                    
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
 
