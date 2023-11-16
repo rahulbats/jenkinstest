@@ -20,4 +20,4 @@ for name in names:
       r = requests.post(connectorurl, data=json.dumps(data), headers=headers)
       print(res) 
   except Exception as error:
-     print("exception occured for"+error)
+     print(error)
