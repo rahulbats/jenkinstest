@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import string 
 gitdiff = os.getenv('gitdiff')
 print(gitdiff)
 
@@ -29,13 +30,14 @@ for name in names:
             else:
                print("updating topic "+topicName)
             jsonFile=open(file[1])
-            jsonstring="{"+jsonFile.read()+"}"
-            
-            jsonstring=jsonstring.format(**os.environ)
+       
+            jsonstring=string.Template(jsonFile.read())
+            jsonstring=jsonstring.substitute(**os.environ)
+
             
             #data = json.load(jsonstring)  
             
-            print("final connector json "+jsonstring)   
+            print("final topic json "+jsonstring)   
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
             r = requests.put(restTopicURL+topicName+"/config", data=jsonstring, headers=headers)
             print(r)    
@@ -55,9 +57,8 @@ for name in names:
             else:
                print("updating connector "+connectorName)
             jsonFile=open(file[1])
-            jsonstring="{"+jsonFile.read()+"}"
-            
-            jsonstring=jsonstring.format(**os.environ)
+            jsonstring=string.Template(jsonFile.read())
+            jsonstring=jsonstring.substitute(**os.environ)
             
             #data = json.load(jsonstring)  
             
