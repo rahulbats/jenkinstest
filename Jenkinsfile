@@ -16,10 +16,12 @@ pipeline {
                     echo env.gitdiff
                     env.connectorURL="http://localhost:8083/connectors/"
 
-                    
+                    env.restURL="http://localhost:8082/"
+                    env.kafkaClusterID="di3r55ecSeij5yE31X7xnA"
+
                     env.kafka_user="rahul"
 
-                    sh ('/usr/local/bin/python connector.py')
+                    sh ('/usr/local/bin/python script.py')
 
                    
                 }
