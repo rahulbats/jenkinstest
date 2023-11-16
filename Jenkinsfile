@@ -14,8 +14,7 @@ pipeline {
 
                     env.gitdiff = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
                     echo env.gitdiff
-                    sh ('chmod 777 script.sh')
-                    sh ("./script.sh \"${env.gitdiff}\"")    
+                     
                     sh ('/usr/local/bin/python connector.py')
 
                     
