@@ -5,11 +5,7 @@ gitdiff = os.getenv('gitdiff')
 print(gitdiff)
 
 names=gitdiff.split("\n")
-connectorurl="http://localhost:8083/connectors/"
-
-kafka_user=os.getenv('kafka_user')
-for name, value in os.environ.items():
-    print("{0}: {1}".format(name, value))
+connectorurl = os.getenv('connectorURL')
 
 for name in names:
   print(name)
@@ -35,13 +31,12 @@ for name in names:
                print("updating connector "+connectorName)
                jsonFile=open(file[1])
                jsonstring="{"+jsonFile.read()+"}"
-               print("this is the json string before replace "+jsonstring)
-               print("this is the user "+os.getenv('kafka_user'))
+              
                jsonstring=jsonstring.format(**os.environ)
               
                #data = json.load(jsonstring)  
                
-               print("this is the json string after replace "+jsonstring)   
+               print("final connector json "+jsonstring)   
                headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
                r = requests.put(connectorurl+connectorName+"/config", data=jsonstring, headers=headers)
                print(r) 
