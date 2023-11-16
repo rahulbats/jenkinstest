@@ -30,7 +30,7 @@ for name in names:
             else:
                print("updating connector "+connectorName)
                jsonFile=open(file[1])
-               jsonstring=jsonFile.read()
+               jsonstring="{"+jsonFile.read()+"}"
                print("this is the json string before replace "+jsonstring)
                jsonstring=jsonstring.format(user=os.getenv('user')) 
 
