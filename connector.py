@@ -7,6 +7,9 @@ print(gitdiff)
 names=gitdiff.split("\n")
 connectorurl="http://localhost:8083/connectors/"
 
+user=os.getenv('user')
+
+
 for name in names:
   print(name)
   file= name.split("\t")
@@ -32,8 +35,9 @@ for name in names:
                jsonFile=open(file[1])
                jsonstring="{"+jsonFile.read()+"}"
                print("this is the json string before replace "+jsonstring)
-               jsonstring=jsonstring.format(user=os.getenv('user')) 
-
+               print("this is the user "+os.getenv('user'))
+               jsonstring=jsonstring.format(**os.environ)
+              
                #data = json.load(jsonstring)  
                
                print("this is the json string after replace "+jsonstring)   
