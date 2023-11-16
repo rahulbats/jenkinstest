@@ -28,18 +28,18 @@ for name in names:
                print("creating topic "+topicName)
             else:
                print("updating topic "+topicName)
-               jsonFile=open(file[1])
-               jsonstring="{"+jsonFile.read()+"}"
-              
-               jsonstring=jsonstring.format(**os.environ)
-              
-               #data = json.load(jsonstring)  
-               
-               print("final connector json "+jsonstring)   
-               headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-               r = requests.put(restTopicURL+topicName+"/config", data=jsonstring, headers=headers)
-               print(r)    
-               
+            jsonFile=open(file[1])
+            jsonstring="{"+jsonFile.read()+"}"
+            
+            jsonstring=jsonstring.format(**os.environ)
+            
+            #data = json.load(jsonstring)  
+            
+            print("final connector json "+jsonstring)   
+            headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+            r = requests.put(restTopicURL+topicName+"/config", data=jsonstring, headers=headers)
+            print(r)    
+
       if "connector-definitions" in file[1]:
          connectorName = file[1].replace(".json","").replace("connector-definitions/","")
          if file[0]=='D': 
@@ -54,17 +54,17 @@ for name in names:
                print("creating connector "+connectorName)
             else:
                print("updating connector "+connectorName)
-               jsonFile=open(file[1])
-               jsonstring="{"+jsonFile.read()+"}"
-              
-               jsonstring=jsonstring.format(**os.environ)
-              
-               #data = json.load(jsonstring)  
-               
-               print("final connector json "+jsonstring)   
-               headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-               r = requests.put(connectorurl+connectorName+"/config", data=jsonstring, headers=headers)
-               print(r) 
+            jsonFile=open(file[1])
+            jsonstring="{"+jsonFile.read()+"}"
+            
+            jsonstring=jsonstring.format(**os.environ)
+            
+            #data = json.load(jsonstring)  
+            
+            print("final connector json "+jsonstring)   
+            headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+            r = requests.put(connectorurl+connectorName+"/config", data=jsonstring, headers=headers)
+            print(r) 
        
       
   except Exception as error:
