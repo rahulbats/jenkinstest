@@ -7,7 +7,7 @@ print(gitdiff)
 
 names=gitdiff.split("\n")
 connectorurl = os.getenv('connectorURL')
-restTopicURL = os.getenv('restURL')+"/v3/clusters/"+os.getenv('kafkaClusterID')+"/topics/"
+restTopicURL = os.getenv('restURL')+"v3/clusters/"+os.getenv('kafkaClusterID')+"/topics/"
 print("this is the restproxy topic url "+restTopicURL)
 for name in names:
   print(name)
