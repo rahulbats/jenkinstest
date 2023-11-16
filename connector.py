@@ -12,7 +12,7 @@ for name in names:
   file= name.split("\t")
   try:
       print(file[0]+"-"+file[1])
-      if file[1]=='Jenkinsfile' or file[1]=='connector.py':
+      if file[1]=='Jenkinsfile' or file[1]=='connector.py' or file[1]=='sc':
          print('continuing for'+file[1])
          continue
       
