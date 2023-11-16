@@ -15,7 +15,7 @@ pipeline {
                     env.gitdiff = sh (script: "git diff --name-status $env.PREVTAG $env.TAG", returnStdout: true)
                     echo env.gitdiff
 
-                    env.user="rahul"
+                    env.kafka_user="rahul"
 
                     sh ('/usr/local/bin/python connector.py')
 

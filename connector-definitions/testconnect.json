@@ -5,5 +5,5 @@
         "output.data.format" : "JSON",
         "quickstart" : "PAGEVIEWS",
         "tasks.max" : "1",
-        "user":"{user}"       
+        "user":"{kafka_user}"       
 }
