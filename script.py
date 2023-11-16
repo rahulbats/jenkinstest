@@ -39,7 +39,7 @@ for name in names:
             
             print("final topic json "+jsonstring)   
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-            r = requests.put(restTopicURL+topicName+"/config", data=jsonstring, headers=headers)
+            r = requests.put(restTopicURL, data=jsonstring, headers=headers)
             print(r)    
 
       if "connector-definitions" in file[1]:
