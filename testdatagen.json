@@ -6,5 +6,4 @@
         "output.data.format" : "JSON",
         "quickstart" : "PAGEVIEWS",
         "tasks.max" : "1"
-    
 }

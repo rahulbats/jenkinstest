@@ -24,7 +24,7 @@ for name in names:
             print(r)
           
          case _: 
-            connectorName = file[1].replace("json","")
+            connectorName = file[1].replace(".json","")
             if file[0]=='A': 
                print("creating connector"+connectorName)
             else:
