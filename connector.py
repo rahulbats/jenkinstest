@@ -11,7 +11,9 @@ for name in names:
   file= name.split("\t")
   try:
       print(file[0]+"-"+file[1])
-      res = requests.get('ttps://stackoverflow.com/questions/260003h36')
+      if file[1]=='Jenkinsfile' or file[1]=='connector.py':
+         print('continuing for'+file[1])
+         continue
       data = json.load(open(file[1]))
       print(data)
       headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
