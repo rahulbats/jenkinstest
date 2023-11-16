@@ -42,7 +42,7 @@ for name in names:
             
             response_code = str(r.status_code)
             print("this is the code "+response_code+" this is the reason: "+r.reason)    
-            if(response_code.startswith("2")==false):
+            if(response_code.startswith("2")==False):
                exit(1)
       if "connector-definitions" in file[1]:
          connectorName = file[1].replace(".json","").replace("connector-definitions/","")
@@ -69,7 +69,7 @@ for name in names:
             
             response_code = str(r.status_code)
             print("this is the code "+response_code+" this is the reason: "+r.reason)   
-            if(response_code.startswith("2")==false):
+            if(response_code.startswith("2")==False):
                exit(1)
       
   except Exception as error:
