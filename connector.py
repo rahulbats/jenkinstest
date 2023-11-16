@@ -29,7 +29,8 @@ for name in names:
                print("creating connector"+connectorName)
             else:
                print("updating connector"+connectorName)
-               jsonstring=open(file[1])
+               jsonFile=open(file[1])
+               jsonstring = jsonFile.read()
                jsonstring.format(user=os.getenv('user')) 
                #data = json.load(jsonstring)  
                
