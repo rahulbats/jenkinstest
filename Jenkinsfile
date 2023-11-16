@@ -18,7 +18,6 @@ pipeline {
                     sh ("./script.sh \"${env.gitdiff}\"")    
                     sh ('/usr/local/bin/python connector.py')
 
-
                     
                     List<String> changes = getChangedFilesList()
                     println ("Changed file list: " + changes)
