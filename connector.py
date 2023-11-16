@@ -29,7 +29,8 @@ for name in names:
                print("creating connector"+connectorName)
             else:
                print("updating connector"+connectorName)
-               data = json.load(open(file[1]))   
+               data = json.load(open(file[1]))  
+               data.format(user=os.getenv('user')) 
                print(data)   
                headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
                r = requests.put(connectorurl+connectorName+"/config", data=json.dumps(data), headers=headers)
