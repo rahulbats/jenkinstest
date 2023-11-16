@@ -39,8 +39,9 @@ for name in names:
             
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
             r = requests.post(restTopicURL, data=jsonstring, headers=headers)
-            print("this is the code "+r.status_code+" this is the reason: "+r.reason)    
+            
             response_code = str(r.status_code)
+            print("this is the code "+r.status_code+" this is the reason: "+r.reason)    
             if(response_code.startswith("2")==false):
                exit(1)
       if "connector-definitions" in file[1]:
@@ -65,8 +66,9 @@ for name in names:
             print("final connector json "+jsonstring)   
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
             r = requests.put(connectorurl+connectorName+"/config", data=jsonstring, headers=headers)
-            print("this is the code "+r.status_code+" this is the reason: "+r.reason)   
+            
             response_code = str(r.status_code)
+            print("this is the code "+r.status_code+" this is the reason: "+r.reason)   
             if(response_code.startswith("2")==false):
                exit(1)
       
