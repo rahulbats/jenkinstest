@@ -28,10 +28,10 @@ for name in names:
             if file[0]=='A': 
                print("creating connector"+connectorName)
             else:
-               print("updating connector"+connectorName+"/config")
+               print("updating connector"+connectorName)
             data = json.load(open(file[1]))   
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-            r = requests.put(connectorurl+connectorName, data=json.dumps(data), headers=headers)
+            r = requests.put(connectorurl+connectorName+"/config", data=json.dumps(data), headers=headers)
       print(r)  
       print(data)
       
