@@ -62,7 +62,7 @@ for name in names:
                   print("this is the code "+response_code+" this is the reason: "+response_reason)   
                   if(response_code.startswith("2")==False):
                      exit(1)
-               elif(requestedChanges.partitions_count<currentPartitionsCount):
+               elif(requestedChanges['partitions_count']<currentPartitionsCount):
                   print("Attempting to reduce partitions which is not allowed")
                   exit(1)   
                updateConfigs= "{\"data\":" + json.dumps(requestedChanges['configs']) +"}"
