@@ -27,25 +27,43 @@ for name in names:
             print(r)
           
         elif file[0]=='A' or file[0]=='M': 
-            
-            if file[0]=='A': 
-               print("creating topic "+topicName)
-            else:
-               print("updating topic "+topicName)
             jsonFile=open(file[1])
-       
             jsonstring=string.Template(jsonFile.read())
             jsonstring=jsonstring.substitute(**os.environ)
 
             print("final topic json "+jsonstring)   
             
             headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-            r = requests.post(restTopicURL, data=jsonstring, headers=headers)
+            response_code = 200
+            response_reason =''
+            if file[0]=='A': 
+               print("creating topic "+topicName)
+               r = requests.post(restTopicURL, data=jsonstring, headers=headers)
+               response_code = str(r.status_code)
+               response_reason = r.reason
+               
+            else:
+               print("updating topic "+topicName)
+               response = requests.get(restTopicURL+topicName,  headers=headers)
+               currentTopicDefinition = response.json()
+               currentPartitionsCount=currentTopicDefinition['partitions_count']
+               requestedChanges = json.load(jsonstring)
+               if(requestedChanges.partitions_count>currentPartitionsCount):
+                  r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
+                  response_code = str(r.status_code)
+                  response_reason = r.reason
+               elif(requestedChanges.partitions_count<currentPartitionsCount):
+                  print("Attempting to reduce partitions which is not allowed")
+                  exit(1)   
             
-            response_code = str(r.status_code)
-            print("this is the code "+response_code+" this is the reason: "+r.reason)    
+       
+            
+            print("this is the code "+response_code+" this is the reason: "+response_reason)   
             if(response_code.startswith("2")==False):
                exit(1)
+            
+             
+            
       if "connector-definitions/" in file[1]:
          appnameconnectorname=file[1].split("/connector-definitions/")
          connectorName = appnameconnectorname[1].replace(".json","")
