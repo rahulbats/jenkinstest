@@ -10,13 +10,26 @@ connectorurl = os.getenv('connectorURL')
 restTopicURL = os.getenv('restURL')+"v3/clusters/"+os.getenv('kafkaClusterID')+"/topics/"
 
 print("this is the restproxy topic url "+restTopicURL)
+connectorFiles=[]
+topicNames=[]
+
 for name in names:
-  print(name)
-  file= name.split("\t")
-  try:
-      print(file[0]+"-"+file[1])
-      
-      if "topics/" in file[1]:
+   if "topics/" in name:
+      topicNames.append(name)
+   else:
+      connectorFiles.append(name)   
+
+print("Topic changes:")
+print(topicNames)
+
+print("Connector file changes:")
+print(connectorFiles)
+
+for name in topicNames:
+   print(name)
+   file= name.split("\t")
+   try:
+        print(file[0]+"-"+file[1])      
         appnametopicname=file[1].split("/topics/")
         topicName = appnametopicname[1].replace(".json","")
         appName=appnametopicname[0]
@@ -73,16 +86,11 @@ for name in names:
                print("this is the code "+response_code+" this is the reason: "+response_reason)   
                if(response_code.startswith("2")==False):
                   exit(1)
-
-
+   except Exception as error:
+     print(error)  
             
-       
-            
-            
-            
-             
-            
-      if "connector-definitions/" in file[1]:
+for name in connectorFiles:
+      try:   
          appnameconnectorname=file[1].split("/connector-definitions/")
          connectorName = appnameconnectorname[1].replace(".json","")
          appName=appnameconnectorname[0]
@@ -112,5 +120,5 @@ for name in names:
             if(response_code.startswith("2")==False):
                exit(1)
       
-  except Exception as error:
-     print(error)
+      except Exception as error:
+         print(error)
