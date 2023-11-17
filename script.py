@@ -51,10 +51,10 @@ for name in names:
                print("existing topic definition ")
                print(currentTopicDefinition)
                currentPartitionsCount=currentTopicDefinition['partitions_count']
-               requestedChanges = json.load(jsonstring)
+               requestedChanges = json.loads(jsonstring)
                print("requested topic definition ")
                print(requestedChanges)
-               if(requestedChanges.partitions_count>currentPartitionsCount):
+               if(requestedChanges['partitions_count']>currentPartitionsCount):
                   r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
                   response_code = str(r.status_code)
                   response_reason = r.reason
