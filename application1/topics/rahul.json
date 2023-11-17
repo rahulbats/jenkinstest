@@ -1,6 +1,6 @@
 {   
     "topic_name": "rahul",
-    "partitions_count": 64,
+    "partitions_count": 65,
     "replication_factor": 1,
     "configs": [
         {
