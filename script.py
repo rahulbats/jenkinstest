@@ -90,6 +90,8 @@ for name in topicNames:
      print(error)  
             
 for name in connectorFiles:
+      print(name)
+      file= name.split("\t")
       try:   
          appnameconnectorname=file[1].split("/connector-definitions/")
          connectorName = appnameconnectorname[1].replace(".json","")
