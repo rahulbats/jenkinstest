@@ -16,7 +16,7 @@ topicNames=[]
 for name in names:
    if "topics/" in name:
       topicNames.append(name)
-   else:
+   elif "connector-definitions/" in name:
       connectorFiles.append(name)   
 
 print("Topic changes:")
