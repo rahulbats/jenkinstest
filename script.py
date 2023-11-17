@@ -65,6 +65,15 @@ for name in names:
                elif(requestedChanges.partitions_count<currentPartitionsCount):
                   print("Attempting to reduce partitions which is not allowed")
                   exit(1)   
+               updateConfigs= "{\"data\":" + json.dumps(requestedChanges['configs']) +"}"
+               print("altering configs to "+updateConfigs)
+               r = requests.post(restTopicURL+topicName+"/configs:alter", data=updateConfigs, headers=headers)
+               response_code = str(r.status_code)
+               response_reason = r.reason
+               print("this is the code "+response_code+" this is the reason: "+response_reason)   
+               if(response_code.startswith("2")==False):
+                  exit(1)
+
 
             
        
