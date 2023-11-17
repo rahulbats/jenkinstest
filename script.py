@@ -56,7 +56,7 @@ for name in names:
                print(requestedChanges)
                if(requestedChanges['partitions_count']>currentPartitionsCount):
                   print("requested increasing partitions from "+str(currentPartitionsCount) +" to "+str(requestedChanges['partitions_count']))
-                  r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
+                  r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+str(requestedChanges['partitions_count'])+"}")
                   response_code = str(r.status_code)
                   response_reason = r.reason
                   print("this is the code "+response_code+" this is the reason: "+response_reason)   
@@ -65,6 +65,7 @@ for name in names:
                elif(requestedChanges.partitions_count<currentPartitionsCount):
                   print("Attempting to reduce partitions which is not allowed")
                   exit(1)   
+
             
        
             
