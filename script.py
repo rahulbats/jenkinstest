@@ -55,6 +55,7 @@ for name in names:
                print("requested topic definition ")
                print(requestedChanges)
                if(requestedChanges['partitions_count']>currentPartitionsCount):
+                  print("requested increasing partitions from "+str(currentPartitionsCount) +" to "+str(requestedChanges['partitions_count']))
                   r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
                   response_code = str(r.status_code)
                   response_reason = r.reason
