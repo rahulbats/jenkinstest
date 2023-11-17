@@ -16,8 +16,10 @@ for name in names:
   try:
       print(file[0]+"-"+file[1])
       
-      if "topics" in file[1]:
-        topicName = file[1].replace(".json","").replace("topics/","") 
+      if "topics/" in file[1]:
+        appnametopicname=file[1].split("/topics/")
+        topicName = appnametopicname[1].replace(".json","")
+        appName=appnametopicname[0]
         if file[0]=='D': 
             
             print("deleting topic"+topicName)
@@ -44,8 +46,10 @@ for name in names:
             print("this is the code "+response_code+" this is the reason: "+r.reason)    
             if(response_code.startswith("2")==False):
                exit(1)
-      if "connector-definitions" in file[1]:
-         connectorName = file[1].replace(".json","").replace("connector-definitions/","")
+      if "connector-definitions/" in file[1]:
+         appnameconnectorname=file[1].split("/connector-definitions/")
+         connectorName = appnameconnectorname[1].replace(".json","")
+         appName=appnameconnectorname[0]
          if file[0]=='D': 
             
             print("deleting connector"+connectorName)
