@@ -41,7 +41,9 @@ for name in names:
                r = requests.post(restTopicURL, data=jsonstring, headers=headers)
                response_code = str(r.status_code)
                response_reason = r.reason
-               
+               print("this is the code "+response_code+" this is the reason: "+response_reason)   
+               if(response_code.startswith("2")==False):
+                  exit(1)
             else:
                print("updating topic "+topicName)
                response = requests.get(restTopicURL+topicName,  headers=headers)
@@ -52,15 +54,16 @@ for name in names:
                   r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
                   response_code = str(r.status_code)
                   response_reason = r.reason
+                  print("this is the code "+response_code+" this is the reason: "+response_reason)   
+                  if(response_code.startswith("2")==False):
+                     exit(1)
                elif(requestedChanges.partitions_count<currentPartitionsCount):
                   print("Attempting to reduce partitions which is not allowed")
                   exit(1)   
             
        
             
-            print("this is the code "+response_code+" this is the reason: "+response_reason)   
-            if(response_code.startswith("2")==False):
-               exit(1)
+            
             
              
             
