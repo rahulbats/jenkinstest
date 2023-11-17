@@ -1,0 +1,15 @@
+{   
+    "topic_name": "{topic_name}",
+    "partitions_count": 64,
+    "replication_factor": 1,
+    "configs": [
+        {
+            "name": "cleanup.policy",
+            "value": "compact"
+        },
+        {
+            "name": "compression.type",
+            "value": "gzip"
+        }
+    ]
+}
