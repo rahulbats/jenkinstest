@@ -48,10 +48,12 @@ for name in names:
                print("updating topic "+topicName)
                response = requests.get(restTopicURL+topicName,  headers=headers)
                currentTopicDefinition = response.json()
-               print("existing topic definition "+currentTopicDefinition)
+               print("existing topic definition ")
+               print(currentTopicDefinition)
                currentPartitionsCount=currentTopicDefinition['partitions_count']
                requestedChanges = json.load(jsonstring)
-               print("requested topic definition "+requestedChanges)
+               print("requested topic definition ")
+               print(requestedChanges)
                if(requestedChanges.partitions_count>currentPartitionsCount):
                   r=requests.patch(restTopicURL+topicName, data="{\"partitions_count\":"+requestedChanges+"}")
                   response_code = str(r.status_code)
