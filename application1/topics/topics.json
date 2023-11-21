@@ -1,0 +1,71 @@
+[
+    {
+        "topic_name": "topic_a",
+        "partitions_count": "4",
+        "replication_factor": 3,
+        "configs": [
+            {
+                "name": "cleanup.policy",
+                "value": "delete"
+            },
+            {
+                "name": "compression.type",
+                "value": "nan"
+            },
+            {
+                "name": "retention.ms",
+                "value": "604800000"
+            },
+            {
+                "name": "segment.bytes",
+                "value": "1073741824"
+            }
+        ]
+    },
+    {
+        "topic_name": "topic_b",
+        "partitions_count": "4",
+        "replication_factor": 3,
+        "configs": [
+            {
+                "name": "cleanup.policy",
+                "value": "delete"
+            },
+            {
+                "name": "compression.type",
+                "value": "nan"
+            },
+            {
+                "name": "retention.ms",
+                "value": "604800000"
+            },
+            {
+                "name": "segment.bytes",
+                "value": "1073741824"
+            }
+        ]
+    },
+    {
+        "topic_name": "topic_c",
+        "partitions_count": "4",
+        "replication_factor": 3,
+        "configs": [
+            {
+                "name": "cleanup.policy",
+                "value": "delete"
+            },
+            {
+                "name": "compression.type",
+                "value": "nan"
+            },
+            {
+                "name": "retention.ms",
+                "value": "604800000"
+            },
+            {
+                "name": "segment.bytes",
+                "value": "1073741824"
+            }
+        ]
+    }
+]

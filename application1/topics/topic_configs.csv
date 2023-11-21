@@ -1,0 +1,4 @@
+topic name,partition count,retention.ms,compression.type,cleanup.policy,segment.bytes,ba.id
+topic_a,4,604800000,gzip,delete,1073741824
+topic_b,4,604800000,gzip,delete,1073741824
+topic_c,4,604800000,gzip,delete,1073741824
