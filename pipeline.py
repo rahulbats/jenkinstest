@@ -19,10 +19,10 @@ def get_latest_commit_diff():
         latest_commit = repo.get_commits()[0]
         feature_topic_content = repo.get_contents("application1/topics/topics.json", ref="test")
         main_topic_content = repo.get_contents("application1/topics/topics.json", ref="main")
-        old_topics = json.loads(feature_topic_content.decoded_content)
-        new_topics = json.loads(main_topic_content.decoded_content)
+        old_topics = json.loads(main_topic_content.decoded_content)
+        new_topics = json.loads(feature_topic_content.decoded_content)
 
-        return old_topics, new_topics
+        return   old_topics, new_topics
     except Exception as e:
         logger.error(f"Error getting latest commit diff: {e}")
         raise
@@ -53,7 +53,7 @@ def find_changed_topics(old_topics, new_topics):
                 changed_topic_names.append({topic_name: diff, "type": "update"})
         else:
             # Topic was removed
-            changed_topic_names.append({topic_name: diff, "type": "removed"})
+            changed_topic_names.append({topic_name: old_topics_dict.get(topic_name), "type": "removed"})
 
     # Check for new additions
     for topic_name in new_topics_dict:
@@ -66,5 +66,3 @@ def find_changed_topics(old_topics, new_topics):
 if __name__ == "__main__":
     old_topics, new_topics = get_latest_commit_diff()
     print(find_changed_topics(old_topics, new_topics))
-
-
