@@ -8,7 +8,9 @@ topics_list = []
 # Add document link to the future topic configs
 
 for index, row in df.iterrows():
+    topic_name = row['topic name']
     topic_dict = {
+        f"{topic_name}" : {
         "topic_name": row['topic name'],
         "partitions_count": str(row['partition count']),
         "replication_factor": 3,
@@ -30,6 +32,7 @@ for index, row in df.iterrows():
                 "value": int(row['segment.bytes'])
             }
         ]
+      }
     }
     topics_list.append(topic_dict)
 
