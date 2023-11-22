@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 
-df = pd.read_csv('topic_configs.csv')
+df = pd.read_csv('application1/topics/topic_configs.csv')
 
 topics_list = []
 
@@ -23,11 +23,11 @@ for index, row in df.iterrows():
             },
             {
                 "name": "retention.ms",
-                "value": str(row['retention.ms'])
+                "value": int(row['retention.ms'])
             },
             {
                 "name": "segment.bytes",
-                "value": str(row['segment.bytes'])
+                "value": int(row['segment.bytes'])
             }
         ]
     }
