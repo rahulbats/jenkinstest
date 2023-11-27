@@ -46,11 +46,6 @@ def get_topics_from_branches():
         raise
 
 
-# def load_json_file(file_path):
-#     with open(file_path, 'r') as file:
-#         return json.load(file)
-
-
 def find_changed_topics(source_topics, feature_topics):
     """
     Compare source topics with feature topics and identify changes, deletions, and new additions.
@@ -182,22 +177,22 @@ def update_existing_topic(topic):
 
 def delete_topic(topic):
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
-    topic_json = json.dumps(topic)
-    try:
-        response = requests.get(rest_topic_url + topic['topic_name'])
-    except Exception as e:
-        logger.error(e)
 
-    try:
-        response = requests.delete(rest_topic_url + {topic['topic_name']})
-        if response.status_code == 204:
-            logger.info(f"The topic {topic} has been successfully deleted")
-    except Exception as e:
-        logger.error(f"The topic {topic} returned {str(response.status_code)} due to the follwing reason: {response.reason}" )
-        logger.error(e)
+    get_response = requests.get(rest_topic_url + topic['topic_name'])
+    if get_response == 200:
+        logger.info(f"Response code is {str(get_response.status_code)}")
+    else:
+        logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
+
+    response = requests.delete(rest_topic_url + topic['topic_name'])
+    if response.status_code == 204:
+            logger.info(f"The topic {topic['topic_name']} has been successfully deleted")
+    else:
+        logger.error(f"The topic {topic['topic_name']} returned {str(response.status_code)} due to the following reason: {response.reason}" )
 
 
 if __name__ == "__main__":
     old_topics, new_topics = get_topics_from_branches()
     changed_topics = find_changed_topics(old_topics, new_topics)
+    print(changed_topics)
     process_changed_topics(changed_topics)
