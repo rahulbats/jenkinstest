@@ -8,6 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def get_environment_variable(variable_name):
     try:
         return os.environ[variable_name]
@@ -47,46 +48,57 @@ def process_topic_changes(topic_names, rest_topic_url):
             response_code = 200
             response_reason =''
             if file[0]=='A':
-                logger.info(f"Remaining logic for topic {topic_name}")
-                r = requests.post(rest_topic_url, data=jsonstring, headers=headers)
-                response_code = str(r.status_code)
-                response_reason = r.reason
-                print("this is the code "+response_code+" this is the reason: "+response_reason)
-                if(response_code.startswith("2")==False):
-                    exit(1)
+                add_new_topic(headers, jsonstring, rest_topic_url, topic_name)
             else:
                 print(f"updating topic {topic_name}")
-                response = requests.get(f"{rest_topic_url}{topic_name}",  headers=headers)
-                currentTopicDefinition = response.json()
-                print("existing topic definition ")
-                print(currentTopicDefinition)
-                currentPartitionsCount=currentTopicDefinition['partitions_count']
-                requestedChanges = json.loads(jsonstring)
-                print("requested topic definition ")
-                print(requestedChanges)
-                if(requestedChanges['partitions_count']>currentPartitionsCount):
-                    print("requested increasing partitions from "+str(currentPartitionsCount) +" to "+str(requestedChanges['partitions_count']))
-                    r=requests.patch(f"{rest_topic_url}{topic_name}", data="{\"partitions_count\":"+str(requestedChanges['partitions_count'])+"}")
-                    response_code = str(r.status_code)
-                    response_reason = r.reason
-                    print("this is the code "+response_code+" this is the reason: "+response_reason)
-                    if(response_code.startswith("2")==False):
-                        exit(1)
-                elif(requestedChanges['partitions_count']<currentPartitionsCount):
-                    print("Attempting to reduce partitions which is not allowed")
-                    exit(1)
-                updateConfigs= "{\"data\":" + json.dumps(requestedChanges['configs']) +"}"
-                print("altering configs to "+updateConfigs)
-                r = requests.post(f"{rest_topic_url}{topic_name}"+"/configs:alter", data=updateConfigs, headers=headers)
-                response_code = str(r.status_code)
-                response_reason = r.reason
-                print("this is the code "+response_code+" this is the reason: "+response_reason)
-                if(response_code.startswith("2")==False):
-                    exit(1)
+                update_existing_topic(headers, jsonstring, rest_topic_url, topic_name)
 
         except Exception as error:
             logger.error(f"Error processing topic change: {error}")
             raise
+
+
+def update_existing_topic(headers, jsonstring, rest_topic_url, topic_name):
+    response = requests.get(f"{rest_topic_url}{topic_name}", headers=headers)
+    currentTopicDefinition = response.json()
+    print("existing topic definition ")
+    print(currentTopicDefinition)
+    currentPartitionsCount = currentTopicDefinition['partitions_count']
+    requestedChanges = json.loads(jsonstring)
+    print("requested topic definition ")
+    print(requestedChanges)
+    if (requestedChanges['partitions_count'] > currentPartitionsCount):
+        print("requested increasing partitions from " + str(currentPartitionsCount) + " to " + str(
+            requestedChanges['partitions_count']))
+        r = requests.patch(f"{rest_topic_url}{topic_name}",
+                           data="{\"partitions_count\":" + str(requestedChanges['partitions_count']) + "}")
+        response_code = str(r.status_code)
+        response_reason = r.reason
+        print("this is the code " + response_code + " this is the reason: " + response_reason)
+        if (response_code.startswith("2") == False):
+            exit(1)
+    elif (requestedChanges['partitions_count'] < currentPartitionsCount):
+        print("Attempting to reduce partitions which is not allowed")
+        exit(1)
+    updateConfigs = "{\"data\":" + json.dumps(requestedChanges['configs']) + "}"
+    print("altering configs to " + updateConfigs)
+    r = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updateConfigs, headers=headers)
+    response_code = str(r.status_code)
+    response_reason = r.reason
+    print("this is the code " + response_code + " this is the reason: " + response_reason)
+    if (response_code.startswith("2") == False):
+        exit(1)
+
+
+def add_new_topic(headers, jsonstring, rest_topic_url, topic_name):
+    logger.info(f"Remaining logic for topic {topic_name}")
+    r = requests.post(rest_topic_url, data=jsonstring, headers=headers)
+    response_code = str(r.status_code)
+    response_reason = r.reason
+    print("this is the code " + response_code + " this is the reason: " + response_reason)
+    if (response_code.startswith("2") == False):
+        exit(1)
+
 
 def process_connector_changes(connector_files, connector_url):
     for name in connector_files:
