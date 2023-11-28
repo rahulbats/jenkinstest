@@ -2,7 +2,6 @@ from github import Github
 from deepdiff import DeepDiff
 import logging
 import os
-import json
 import requests
 import json
 
@@ -124,8 +123,6 @@ def add_new_topic(topic):
     Parameters:
     - topic (dict): Dictionary representing the configuration of the new Kafka topic.
 
-    Raises:
-    Exception: If there is an error in creating the new topic, an exception is raised, and details are logged.
     """
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
     topic_json = json.dumps(topic)
@@ -179,7 +176,7 @@ def delete_topic(topic):
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
 
     get_response = requests.get(rest_topic_url + topic['topic_name'])
-    if get_response == 200:
+    if get_response.status_code == 200:
         logger.info(f"Response code is {str(get_response.status_code)}")
     else:
         logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
