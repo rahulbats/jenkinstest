@@ -92,11 +92,12 @@ def find_changed_topics(source_topics, feature_topics):
 
 def process_changed_topics(changed_topic_names):
     for topic in changed_topic_names:
+        topic_name = list(topic.keys())[0]
         topic_configs = list(topic.values())[0]
         if topic['type'] == 'new':
             add_new_topic(topic_configs)
         elif topic['type'] == 'update':
-            update_existing_topic(topic_configs)
+            update_existing_topic(topic_name, topic_configs)
         else:
             delete_topic(topic_configs)
 
@@ -133,43 +134,126 @@ def add_new_topic(topic):
         logger.error(f"The topic {topic['topic_name']} returned {str(response.status_code)} due to the follwing reason: {response.reason}" )
 
 
-def update_existing_topic(topic):
+def update_existing_topic(topic_name, topic_config):
+    """
+    Update an existing Kafka topic based on the provided topic configuration.
+
+    Parameters:
+    - topic_name (str): The name of the Kafka topic to be updated.
+    - topic_config (dict): Dictionary containing the configuration changes for the Kafka topic.
+
+    Raises:
+    SystemExit: If any of the update steps fail, the program exits with status code 1.
+
+    Notes:
+    This function first retrieves the current definition of the topic by making a GET request to the Kafka REST API.
+    It then updates the replication factor and partition count using helper functions.
+    Finally, it alters the topic configurations using a POST request to the Kafka REST API.
+    """
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
-    topic_json = json.dumps(topic)
     try:
-        response = requests.get(rest_topic_url + topic['topic_name'])
+        response = requests.get(rest_topic_url + topic_name)
     except Exception as e:
         logger.error(e)
 
-    currentTopicDefinition = response.json()
-    print("existing topic definition ")
-    print(currentTopicDefinition)
-    currentPartitionsCount = currentTopicDefinition['partitions_count']
-    requestedChanges = topic_json
-    print("requested topic definition ")
-    print(requestedChanges)
-    if (requestedChanges['partitions_count'] > currentPartitionsCount):
-        print("requested increasing partitions from " + str(currentPartitionsCount) + " to " + str(
-            requestedChanges['partitions_count']))
-        partition_response = requests.patch(f"{rest_topic_url}{topic['topic_name']}",
-                           data="{\"partitions_count\":" + str(requestedChanges['partitions_count']) + "}")
-        response_code = str(partition_response.status_code)
-        response_reason = partition_response.reason
-        print("this is the code " + partition_response + " this is the reason: " + response_reason)
-        if (response_code.startswith("2") == False):
+    current_topic_definition = response.json()
+    print(f"existing topic definition :{current_topic_definition}")
+    partition_response = update_replication_factor(current_topic_definition, rest_topic_url, topic_config, topic_name)
+    partition_response = update_partition_count(current_topic_definition, partition_response, rest_topic_url,
+                                                topic_config, topic_name)
+    # Check if the requested update is a config change
+    updateConfigs = "{\"data\":" + json.dumps(topic_config['configs']) + "}"
+    logger.info("altering configs to " + updateConfigs)
+    response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
+    logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
+    if partition_response.reason != 200:
+        exit(1)
+
+
+def update_replication_factor(current_topic_definition, rest_topic_url, topic_config, topic_name):
+    """
+    Update the replication factor for a Kafka topic based on the provided configuration.
+
+    Parameters:
+    - current_topic_definition (dict): Dictionary representing the current configuration of the Kafka topic.
+    - rest_topic_url (str): The REST API URL for the Kafka topic.
+    - topic_config (dict): Dictionary containing the configuration changes for the Kafka topic.
+    - topic_name (str): The name of the Kafka topic.
+
+    Returns:
+    requests.Response: The response from the REST API call to update the replication factor.
+
+    Raises:
+    SystemExit: If the replication factor update fails, the program exits with status code 1.
+    """
+    current_replication_factor = current_topic_definition['replication_factor']
+    # Check if the requested update is the replication factor
+    if topic_config["values_changed"]["root[\'replication_factor\']"]:
+        new_replication_factor = int(topic_config["values_changed"]["root[\'replication_factor\']"]["new_value"])
+        if new_replication_factor != current_replication_factor:
+            logger.info(f"A requested change for replication factor for topic  {topic_name} is from "
+                        f"{str(current_replication_factor)} to {str(new_replication_factor)}")
+            partition_response = requests.patch(f"{rest_topic_url}{topic_name}",
+                                                data="{\"replication_factor\":" + new_replication_factor + "}")
+            if partition_response.status_code != 200:
+                logger.info(
+                    f"The replication factor change failed for topic {topic_name} due to {str(partition_response.status_code)} -  {partition_response.reason}")
+                exit(1)
+            logger.info(f"The replication factor change for topic {topic_name} was successful")
+    return partition_response
+
+
+def update_partition_count(current_topic_definition, partition_response, rest_topic_url, topic_config, topic_name):
+    """
+    Update the partition count for a Kafka topic based on the provided configuration.
+
+    Parameters:
+    - current_topic_definition (dict): Dictionary representing the current configuration of the Kafka topic.
+    - partition_response (requests.Response): The response from the previous REST API call to update replication factor.
+    - rest_topic_url (str): The REST API URL for the Kafka topic.
+    - topic_config (dict): Dictionary containing the configuration changes for the Kafka topic.
+    - topic_name (str): The name of the Kafka topic.
+
+    Returns:
+    requests.Response: The response from the REST API call to update the partition count.
+
+    Raises:
+    SystemExit: If the partition count update fails, the program exits with status code 1.
+    """
+    current_partitions_count = current_topic_definition['partitions_count']
+    # Check if the requested update is the partition count
+    if topic_config["values_changed"]["root[\'replication_factor\']"]:
+        new_partition_count = int(topic_config["values_changed"]["root[\'partitions_count\']"]["new_value"])
+        if new_partition_count > current_partitions_count:
+            logger.info(f"A requested increase of partitions for topic  {topic_name} is from "
+                        f"{str(current_partitions_count)} to {str(new_partition_count)}")
+            partition_response = requests.patch(f"{rest_topic_url}{topic_name}",
+                                                data="{\"partitions_count\":" + new_partition_count + "}")
+            if partition_response.status_code != 200:
+                logger.info(
+                    f"The partition increase failed for topic {topic_name} due to {str(partition_response.status_code)} -  {partition_response.reason}")
+                exit(1)
+            logger.info(f"The partition increase for topic {topic_name} was successful")
+        elif new_partition_count < current_partitions_count:
+            logger.error("Cannot reduce partition count for a given topic")
             exit(1)
-    elif (requestedChanges['partitions_count'] < currentPartitionsCount):
-        print("Attempting to reduce partitions which is not allowed")
-        exit(1)
-    updateConfigs = "{\"data\":" + json.dumps(requestedChanges['configs']) + "}"
-    print("altering configs to " + updateConfigs)
-    response = requests.post(f"{rest_topic_url}{topic['topic_name']}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
-    print("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
-    if (response_code.startswith("2") == False):
-        exit(1)
+    return partition_response
 
 
 def delete_topic(topic):
+    """
+    Delete a Kafka topic based on the provided topic configuration.
+
+    Parameters:
+    - topic (dict): Dictionary representing the configuration of the Kafka topic, including the topic name.
+
+    Raises:
+    SystemExit: If the deletion fails, the program exits with status code 1.
+
+    Notes:
+    This method first checks if the topic exists by making a GET request to the Kafka REST API.
+    If the topic exists, it proceeds to delete the topic using a DELETE request.
+    """
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
 
     get_response = requests.get(rest_topic_url + topic['topic_name'])
