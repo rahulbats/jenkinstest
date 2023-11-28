@@ -33,7 +33,6 @@ def get_topics_from_branches():
     try:
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
-        latest_commit = repo.get_commits()[0]
         feature_topic_content = repo.get_contents("application1/topics/topics.json", ref="test")
         main_topic_content = repo.get_contents("application1/topics/topics.json", ref="main")
         source_topics = json.loads(main_topic_content.decoded_content)
@@ -152,11 +151,11 @@ def update_existing_topic(topic):
     if (requestedChanges['partitions_count'] > currentPartitionsCount):
         print("requested increasing partitions from " + str(currentPartitionsCount) + " to " + str(
             requestedChanges['partitions_count']))
-        r = requests.patch(f"{rest_topic_url}{topic['topic_name']}",
+        partition_response = requests.patch(f"{rest_topic_url}{topic['topic_name']}",
                            data="{\"partitions_count\":" + str(requestedChanges['partitions_count']) + "}")
-        response_code = str(r.status_code)
-        response_reason = r.reason
-        print("this is the code " + response_code + " this is the reason: " + response_reason)
+        response_code = str(partition_response.status_code)
+        response_reason = partition_response.reason
+        print("this is the code " + partition_response + " this is the reason: " + response_reason)
         if (response_code.startswith("2") == False):
             exit(1)
     elif (requestedChanges['partitions_count'] < currentPartitionsCount):
@@ -164,10 +163,8 @@ def update_existing_topic(topic):
         exit(1)
     updateConfigs = "{\"data\":" + json.dumps(requestedChanges['configs']) + "}"
     print("altering configs to " + updateConfigs)
-    r = requests.post(f"{rest_topic_url}{topic['topic_name']}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
-    response_code = str(r.status_code)
-    response_reason = r.reason
-    print("this is the code " + response_code + " this is the reason: " + response_reason)
+    response = requests.post(f"{rest_topic_url}{topic['topic_name']}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
+    print("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
     if (response_code.startswith("2") == False):
         exit(1)
 
