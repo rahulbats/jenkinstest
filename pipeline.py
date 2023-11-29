@@ -70,10 +70,10 @@ def find_changed_topics(source_topics, feature_topics):
 
     changed_topic_names = []
     # Check for changes and deletions
-    for topic_name, old_topic in source_topics_dict.items():
-        new_topic = feature_topics_dict.get(topic_name)
-        if new_topic:
-            diff = DeepDiff(old_topic, new_topic, ignore_order=True)
+    for topic_name, source_topic in source_topics_dict.items():
+        feature_topic = feature_topics_dict.get(topic_name)
+        if feature_topic:
+            diff = DeepDiff(source_topic, feature_topic, ignore_order=True)
             if diff:
                 changed_topic_names.append({topic_name: diff, "type": "update"})
                 logger.info(f"The following topic will be updated : {topic_name}")
@@ -91,17 +91,21 @@ def find_changed_topics(source_topics, feature_topics):
 
 
 def process_changed_topics(changed_topic_names):
-    for topic in changed_topic_names:
-        topic_name = list(topic.keys())[0]
-        topic_configs = list(topic.values())[0]
+    for i, topic in enumerate(changed_topic_names):
+        topic_name = list(topic.keys())[i]
+        topic_configs = list(topic.values())[i]
         if topic['type'] == 'new':
             add_new_topic(topic_configs)
         elif topic['type'] == 'update':
-            print(topic_name)
+            for k, v in topic.items():
+                print(f"{k} : {v}")
             print(topic_configs)
             update_existing_topic(topic_name, topic_configs)
         else:
             delete_topic(topic_configs)
+
+
+
 
 
 def build_topic_rest_url(base_url, cluster_id):
@@ -166,32 +170,7 @@ def update_existing_topic(topic_name, topic_config):
         logger.info("altering configs to " + updateConfigs)
         response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
         logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
-    # update_replication_factor(current_topic_definition, rest_topic_url, topic_config, topic_name)
     update_partition_count(current_topic_definition, rest_topic_url, topic_config, topic_name)
-
-
-def update_replication_factor(current_topic_definition, rest_topic_url, topic_config, topic_name):
-    """
-    Update the replication factor for a Kafka topic based on the provided configuration.
-
-    Parameters:
-    - current_topic_definition (dict): Dictionary representing the current configuration of the Kafka topic.
-    - rest_topic_url (str): The REST API URL for the Kafka topic.
-    - topic_config (dict): Dictionary containing the configuration changes for the Kafka topic.
-    - topic_name (str): The name of the Kafka topic.
-
-    Returns:
-    requests.Response: The response from the REST API call to update the replication factor.
-
-    Raises:
-    SystemExit: If the replication factor update fails, the program exits with status code 1.
-    """
-    current_replication_factor = current_topic_definition['replication_factor']
-    # Check if the requested update is the replication factor
-    # try:
-    # replication factor
-    # except KeyError:
-    #     logger.info("Replication Factor was not requested to be updated ")
 
 
 def update_partition_count(current_topic_definition, rest_topic_url, topic_config, topic_name):
@@ -256,6 +235,128 @@ def delete_topic(topic):
             logger.info(f"The topic {topic['topic_name']} has been successfully deleted")
     else:
         logger.error(f"The topic {topic['topic_name']} returned {str(response.status_code)} due to the following reason: {response.reason}" )
+
+
+
+def find_changed_acls(source_acls, feature_acls):
+    """
+    Compare source topics with feature topics and identify changes, deletions, and new additions.
+
+    Parameters:
+    - source_topics (list of dicts): List of dictionaries representing source topics.
+    - feature_topics (list of dicts): List of dictionaries representing feature topics.
+
+    Returns:
+    list: A list of dictionaries, each containing information about changed topics. Each dictionary has the following format:
+        {'acl_id': str, 'type': str, 'changes': dict}
+        - 'acl_id': The identifier of the acl.
+        - 'type': Type of change ('update', 'removed', 'new').
+        - 'changes': Dictionary representing the changes (present if 'type' is 'update').
+    """
+    source_acls_dict = {}
+    feature_acls_dict = {}
+
+    for value in source_acls:
+        source_acls_dict.update(value)
+
+    for value in feature_acls:
+        feature_acls_dict.update(value)
+
+    changed_acls = []
+    # Check for changes and deletions
+    for topic_name, source_topic in source_acls_dict.items():
+        feature_topic = feature_acls_dict.get(topic_name)
+        if feature_topic:
+            diff = DeepDiff(source_topic, feature_topic, ignore_order=True)
+            if diff:
+                changed_acls.append({topic_name: diff, "type": "update"})
+                logger.info(f"The following topic will be updated : {topic_name}")
+        else:
+            # Topic was removed
+            changed_acls.append({topic_name: source_acls_dict.get(topic_name), "type": "removed"})
+            logger.info(f"The following topic will be removed : {topic_name}")
+
+    # Check for new additions
+    for topic_name in feature_acls_dict:
+        if topic_name not in source_acls_dict.keys():
+            changed_acls.append({topic_name: feature_acls_dict.get(topic_name), "type": "new"})
+            logger.info(f"The following topic will be added : {topic_name}")
+    return changed_acls
+
+
+
+def build_acl_rest_url(base_url, cluster_id):
+    """
+    Build the REST API URL for Kafka topics based on the provided base URL and cluster ID.
+
+    Parameters:
+    - base_url (str): The base URL of the Kafka REST API.
+    - cluster_id (str): The ID of the Kafka cluster.
+
+    Returns:
+    str: The constructed REST API URL for Kafka topics.
+    """
+    return f'{base_url}/v3/clusters/{cluster_id}/acls/'
+
+def add_new_acl(acl):
+    """
+    Add a new Kafka acl using the provided ACL configuration.
+
+    Parameters:
+    - acl (dict): Dictionary representing the configuration of the new Kafka ACL.
+
+    """
+    rest_acl_url = build_acl_rest_url(REST_URL, CLUSTER_ID)
+    topic_json = json.dumps(acl)
+
+    response = requests.post(rest_acl_url, data=topic_json, headers=HEADERS)
+    if response.status_code == 201:
+        logger.info(f"The acl {acl.keys()[0]} has been successfully created")
+    else:
+        logger.error(f"The topic {acl.keys()[0]} returned {str(response.status_code)} due to the follwing reason: {response.reason}")
+
+
+def delete_acl(acl):
+    """
+    Delete a Kafka acl based on the provided topic configuration.
+
+    Parameters:
+    - topic (dict): Dictionary representing the configuration of the Kafka acl, including the topic name.
+
+    Raises:
+    SystemExit: If the deletion fails, the program exits with status code 1.
+
+    Notes:
+    This method first checks if the topic exists by making a GET request to the Kafka REST API.
+    If the topic exists, it proceeds to delete the topic using a DELETE request.
+    """
+    rest_acl_url = build_acl_rest_url(REST_URL, CLUSTER_ID)
+
+    get_response = requests.get(rest_acl_url + acl['topic_name'])
+    if get_response.status_code == 200:
+        logger.info(f"Response code is {str(get_response.status_code)}")
+    else:
+        logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
+
+    response = requests.delete(rest_acl_url + acl['topic_name'])
+    if response.status_code == 204:
+        logger.info(f"The acl {acl.keys()[0]} has been successfully deleted")
+    else:
+        logger.error(f"The acl {acl.keys()[0]} returned {str(response.status_code)} due to the following reason: {response.reason}")
+
+def process_changed_acls(changed_acls):
+    for i, topic in enumerate(changed_acls):
+        topic_name = list(topic.keys())[i]
+        topic_configs = list(topic.values())[i]
+        if topic['type'] == 'new':
+            add_new_acl(topic_configs)
+        elif topic['type'] == 'update':
+            for k, v in topic.items():
+                print(f"{k} : {v}")
+            print(topic_configs)
+            update_existing_topic(topic_name, topic_configs)
+        else:
+            delete_acl(topic_configs)
 
 
 if __name__ == "__main__":
