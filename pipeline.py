@@ -125,7 +125,6 @@ def process_changed_topics(changed_topic_names):
         if topic['type'] == 'new':
             add_new_topic(topic_configs)
         elif topic['type'] == 'update':
-            print(topic)
             update_existing_topic(topic['changes']['topic_name'], topic['changes']['changes'])
         else:
             delete_topic(topic_name)
