@@ -111,7 +111,7 @@
                 },
                 {
                     "name": "compression.type",
-                    "value": "none"
+                    "value": "uncompressed"
                 },
                 {
                     "name": "retention.ms",

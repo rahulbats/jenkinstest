@@ -70,47 +70,50 @@ def find_changed_topics(source_topics, new_topics):
             if diff:
                 print(diff['values_changed'])
                 # Check if this is a partition change
-                if diff['values_changed'] == { "root[\'partitions_count\']": diff['values_changed']["root[\'partitions_count\']"]}:
-                    for change_type, details in diff.items():
-                        change_dict = {
-                            "topic_name": topic_name,
-                            "changes": []
-                        }
-                        for change in details:
-                            configs_changes = re.findall(r"\['(.*?)'\]", change)
-                            change_dict["changes"].append({
-                                configs_changes[0]: details[change]['new_value']
-                            })
-                    changed_topic_names.append({"type": "update", "changes": change_dict})
-                else:
-                    for change_type, details in diff.items():
-                        change_dict = {
-                            "topic_name": topic_name,
-                            "changes": []
-                        }
+                try:
+                    if diff['values_changed'] == { "root[\'partitions_count\']": diff['values_changed']["root[\'partitions_count\']"]}:
+                        for change_type, details in diff.items():
+                            change_dict = {
+                                "topic_name": topic_name,
+                                "changes": []
+                            }
+                            for change in details:
+                                configs_changes = re.findall(r"\['(.*?)'\]", change)
+                                change_dict["changes"].append({
+                                    configs_changes[0]: details[change]['new_value']
+                                })
+                        changed_topic_names.append({"type": "update", "changes": change_dict})
+                except KeyError as ke:
+                    logger.error(ke)
 
-                        for change in details:
-                            configs_changes = re.findall(r"configs'\]\[(.*)\]\[", change)
-                            if configs_changes:
-                                for index in configs_changes:
-                                    # config_index = int(configs_changes[int(index)])
-                                    prop_name = feature_topics_dict[topic_name]['configs'][int(index)]
-                                    change_dict["changes"].append({
-                                        "name": prop_name["name"],
-                                        "value": details[change]['new_value']
-                                    })
+                for change_type, details in diff.items():
+                    change_dict = {
+                        "topic_name": topic_name,
+                        "changes": []
+                    }
 
-                                continue
-
-                            property_name_list = re.findall(r"\['(.*?)'\]", change)
-                            if property_name_list:
-                                prop_name = property_name_list[0]
+                    for change in details:
+                        configs_changes = re.findall(r"configs'\]\[(.*)\]\[", change)
+                        if configs_changes:
+                            for index in configs_changes:
+                                # config_index = int(configs_changes[int(index)])
+                                prop_name = feature_topics_dict[topic_name]['configs'][int(index)]
                                 change_dict["changes"].append({
                                     "name": prop_name["name"],
                                     "value": details[change]['new_value']
                                 })
 
-                    changed_topic_names.append({"type": "update", "changes": change_dict})
+                            continue
+
+                        property_name_list = re.findall(r"\['(.*?)'\]", change)
+                        if property_name_list:
+                            prop_name = property_name_list[0]
+                            change_dict["changes"].append({
+                                "name": prop_name["name"],
+                                "value": details[change]['new_value']
+                            })
+
+                changed_topic_names.append({"type": "update", "changes": change_dict})
         else:
             # Topic was removed
             changed_topic_names.append({topic_name: source_topics_dict.get(topic_name), "type": "removed"})
@@ -215,7 +218,7 @@ def update_existing_topic(topic_name, topic_config):
         updated_Configs = "{\"data\":" + json.dumps(topic_config) + "}"
         logger.info("altering configs to " + updated_Configs)
         response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updated_Configs, headers=HEADERS)
-        logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
+        logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.text)
 
 
 
