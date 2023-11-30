@@ -1,11 +1,14 @@
+from datetime import datetime, timedelta
 from github import Github
 from deepdiff import DeepDiff
+
 import logging
 import os
 import requests
 import json
 import re
 import string
+import subprocess
 
 # Constant variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -435,15 +438,23 @@ def process_connector_changes(connector_file):
 
 if __name__ == "__main__":
 
-    # source_file = "application1/topics/topics.json"
-    # source_branch = "main"
-    #
-    # feature_file = "application1/topics/topics.json"
-    # feature_branch = "test"
-    # source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
-    # if "topic" in source_file and feature_file:
-    #     changed_topics = find_changed_topics(source_content, feature_content)
-    #     process_changed_topics(changed_topics)
-    feature_file = "application1/connectors/connect-datagen-src.json"
-    if "connector" in feature_file:
-        process_connector_changes(feature_file)
+    source_file = "application1/topics/topics.json"
+    source_branch = "main"
+
+    feature_file = "application1/topics/topics.json"
+    feature_branch = "test"
+    source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
+    if "topic" in source_file and feature_file:
+        changed_topics = find_changed_topics(source_content, feature_content)
+        process_changed_topics(changed_topics)
+    # feature_file = "application1/connectors/connect-datagen-src.json"
+    # if "connector" in feature_file:
+    #     g = Github(GITHUB_TOKEN)
+    #     repo = g.get_repo("NiyiOdumosu/kafkamanager")
+    #     since = datetime.now() - timedelta(days=1)
+    #     commits = repo.get_commits(since=since)
+    #     subprocess.run(['git', 'diff', '--name-status', ''])
+    #     for commit in commits:
+    #         output = subprocess.run(['git', 'diff', '--name-status', commit.sha])
+    #         print(output.stdout)
+    # process_connector_changes(feature_file)
