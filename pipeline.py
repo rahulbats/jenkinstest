@@ -4,6 +4,7 @@ import logging
 import os
 import requests
 import json
+import re
 
 # Constant variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -44,50 +45,77 @@ def get_topics_from_branches():
         raise
 
 
-def find_changed_topics(source_topics, feature_topics):
-    """
-    Compare source topics with feature topics and identify changes, deletions, and new additions.
-
-    Parameters:
-    - source_topics (list of dicts): List of dictionaries representing source topics.
-    - feature_topics (list of dicts): List of dictionaries representing feature topics.
-
-    Returns:
-    list: A list of dictionaries, each containing information about changed topics. Each dictionary has the following format:
-        {'topic_name': str, 'type': str, 'changes': dict}
-        - 'topic_name': The name of the topic.
-        - 'type': Type of change ('update', 'removed', 'new').
-        - 'changes': Dictionary representing the changes (present if 'type' is 'update').
-    """
+def find_changed_topics(source_topics, new_topics):
     source_topics_dict = {}
     feature_topics_dict = {}
 
     for value in source_topics:
         source_topics_dict.update(value)
 
-    for value in feature_topics:
+    for value in new_topics:
         feature_topics_dict.update(value)
 
     changed_topic_names = []
     # Check for changes and deletions
     for topic_name, source_topic in source_topics_dict.items():
-        feature_topic = feature_topics_dict.get(topic_name)
-        if feature_topic:
-            diff = DeepDiff(source_topic, feature_topic, ignore_order=True)
+        updated_topic = feature_topics_dict.get(topic_name)
+
+        if updated_topic:
+            diff = DeepDiff(source_topic, updated_topic, ignore_order=True)
             if diff:
-                changed_topic_names.append({topic_name: diff, "type": "update"})
-                logger.info(f"The following topic will be updated : {topic_name}")
+                for change_type, details in diff.items():
+                    change_dict = {
+                        "topic_name": topic_name,
+                        "changes": []
+                    }
+
+                    for change in details:
+                        configs_changes = re.findall(r"configs'\]\[(.*)\]\[", change)
+                        if configs_changes:
+                            for index in configs_changes:
+                                # config_index = int(configs_changes[int(index)])
+                                prop_name = feature_topics_dict[topic_name]['configs'][int(index)]
+                                change_dict["changes"].append({
+                                    "name": prop_name["name"],
+                                    "value": details[change]['new_value']
+                                })
+
+                            continue
+
+                        property_name_list = re.findall(r"\['(.*?)'\]", change)
+                        if property_name_list:
+                            prop_name = property_name_list[0]
+                            change_dict["changes"].append({
+                                "name": prop_name["name"],
+                                "value": details[change]['new_value']
+                            })
+
+                changed_topic_names.append({"type": "update", "changes": change_dict})
         else:
             # Topic was removed
             changed_topic_names.append({topic_name: source_topics_dict.get(topic_name), "type": "removed"})
-            logger.info(f"The following topic will be removed : {topic_name}")
 
     # Check for new additions
     for topic_name in feature_topics_dict:
         if topic_name not in source_topics_dict.keys():
             changed_topic_names.append({topic_name: feature_topics_dict.get(topic_name), "type": "new"})
-            logger.info(f"The following topic will be added : {topic_name}")
+
     return changed_topic_names
+
+
+def extract_data(changed_topics):
+    results = []
+    for topic in changed_topics:
+        if topic["changes"]:
+            for change in topic["changes"]["changes"]:
+                property_name = change["prop_name"]
+                property_value = change["changes"]["new_value"]
+                results.append({"data": {
+                    "name": property_name,
+                    "value": property_value
+                }})
+
+    return results
 
 
 def process_changed_topics(changed_topic_names):
@@ -97,12 +125,10 @@ def process_changed_topics(changed_topic_names):
         if topic['type'] == 'new':
             add_new_topic(topic_configs)
         elif topic['type'] == 'update':
-            for k, v in topic.items():
-                print(f"{k} : {v}")
-            print(topic_configs)
-            update_existing_topic(topic_name, topic_configs)
+            print(topic)
+            update_existing_topic(topic['changes']['topic_name'], topic['changes']['changes'])
         else:
-            delete_topic(topic_configs)
+            delete_topic(topic_name)
 
 
 
@@ -165,12 +191,12 @@ def update_existing_topic(topic_name, topic_config):
     current_topic_definition = response.json()
     print(f"existing topic definition :{current_topic_definition}")
     # Check if the requested update is a config change
-    if not topic_config["values_changed"]["root[\'partitions_count\']"]:
-        updateConfigs = "{\"data\":" + json.dumps(topic_config['configs']) + "}"
-        logger.info("altering configs to " + updateConfigs)
-        response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updateConfigs, headers=HEADERS)
-        logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
-    update_partition_count(current_topic_definition, rest_topic_url, topic_config, topic_name)
+    # if not topic_config["values_changed"]["root[\'partitions_count\']"]:
+    updated_Configs = "{\"data\":" + json.dumps(topic_config) + "}"
+    logger.info("altering configs to " + updated_Configs)
+    response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updated_Configs, headers=HEADERS)
+    logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.reason)
+    # update_partition_count(current_topic_definition, rest_topic_url, topic_config, topic_name)
 
 
 def update_partition_count(current_topic_definition, rest_topic_url, topic_config, topic_name):
@@ -208,7 +234,7 @@ def update_partition_count(current_topic_definition, rest_topic_url, topic_confi
         logger.error("Failed due to " + e)
 
 
-def delete_topic(topic):
+def delete_topic(topic_name):
     """
     Delete a Kafka topic based on the provided topic configuration.
 
@@ -224,17 +250,17 @@ def delete_topic(topic):
     """
     rest_topic_url = build_topic_rest_url(REST_URL, CLUSTER_ID)
 
-    get_response = requests.get(rest_topic_url + topic['topic_name'])
+    get_response = requests.get(rest_topic_url + topic_name)
     if get_response.status_code == 200:
         logger.info(f"Response code is {str(get_response.status_code)}")
     else:
         logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
 
-    response = requests.delete(rest_topic_url + topic['topic_name'])
+    response = requests.delete(rest_topic_url + topic_name)
     if response.status_code == 204:
-            logger.info(f"The topic {topic['topic_name']} has been successfully deleted")
+            logger.info(f"The topic {topic_name} has been successfully deleted")
     else:
-        logger.error(f"The topic {topic['topic_name']} returned {str(response.status_code)} due to the following reason: {response.reason}" )
+        logger.error(f"The topic {topic_name} returned {str(response.status_code)} due to the following reason: {response.reason}" )
 
 
 
