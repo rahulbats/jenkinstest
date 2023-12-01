@@ -451,11 +451,11 @@ if __name__ == "__main__":
         changed_topics = find_changed_topics(source_content, feature_content)
         process_changed_topics(changed_topics)
 
-    subprocess.run(['git','checkout', feature_branch]).stdout
-    latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
-    if latest_sha is not None:
-        output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
-        print(output.stdout)
+    subprocess.run(['git', 'checkout', feature_branch]).stdout
+    # latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
+    # if latest_sha is not None:
+    #     output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
+
     if "connector" in feature_file:
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
