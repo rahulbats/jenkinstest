@@ -452,9 +452,10 @@ if __name__ == "__main__":
         process_changed_topics(changed_topics)
 
     subprocess.run(['git', 'checkout', feature_branch]).stdout
-    # latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
-    # if latest_sha is not None:
-    #     output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
+    latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
+    if latest_sha is not None:
+        output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
+        print(output.stdout)
 
     if "connector" in feature_file:
         g = Github(GITHUB_TOKEN)
