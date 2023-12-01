@@ -40,8 +40,8 @@ def get_content_from_branches(source_file, source_branch, feature_file, feature_
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
         feature_topic_content = repo.get_contents(feature_file, ref=feature_branch)
-        main_topic_content = repo.get_contents(source_file, ref=source_branch)
-        source_topics = json.loads(main_topic_content.decoded_content)
+        source_topic_content = repo.get_contents(source_file, ref=source_branch)
+        source_topics = json.loads(source_topic_content.decoded_content)
         feature_topics = json.loads(feature_topic_content.decoded_content)
 
         return source_topics, feature_topics
@@ -433,7 +433,7 @@ def process_connector_changes(connector_file):
     json_string = json_string_template.substitute(**os.environ)
 
     response = requests.put(connect_rest_url, data=json_string, headers=HEADERS)
-    if response.status_code == 200:
+    if response.status_code == 201:
         logger.info(f"The connector {connector_name} has been successfully deleted")
     else:
         logger.error(f"The connector {connector_name} returned {str(response.status_code)} due to the following reason: {response.text}")
@@ -450,14 +450,14 @@ if __name__ == "__main__":
     if "topic" in source_file and feature_file:
         changed_topics = find_changed_topics(source_content, feature_content)
         process_changed_topics(changed_topics)
-    # feature_file = "application1/connectors/connect-datagen-src.json"
-    # if "connector" in feature_file:
-    #     g = Github(GITHUB_TOKEN)
-    #     repo = g.get_repo("NiyiOdumosu/kafkamanager")
-    #     since = datetime.now() - timedelta(days=1)
-    #     commits = repo.get_commits(since=since)
-    #     subprocess.run(['git', 'diff', '--name-status', ''])
-    #     for commit in commits:
-    #         output = subprocess.run(['git', 'diff', '--name-status', commit.sha])
-    #         print(output.stdout)
-    # process_connector_changes(feature_file)
+    if "connector" in feature_file:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo("NiyiOdumosu/kafkamanager")
+        process_connector_changes(feature_file)
+        # since = datetime.now() - timedelta(days=1)
+        # commits = repo.get_commits(since=since)
+        # subprocess.run(['git', 'diff', '--name-status', ''])
+        # for commit in commits:
+        #     output = subprocess.run(['git', 'diff', '--name-status', commit.sha])
+        #     print(output.stdout)
+
