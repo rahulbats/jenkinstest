@@ -453,10 +453,9 @@ if __name__ == "__main__":
 
     subprocess.run(['git', 'checkout', feature_branch]).stdout
     latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
-    output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)]).stdout
-    # if latest_sha is not None:
-    #     output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
-    #     print(output.stdout)
+    if latest_sha is not None:
+        output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
+        print(output.stdout)
 
     if "connector" in feature_file:
         g = Github(GITHUB_TOKEN)
