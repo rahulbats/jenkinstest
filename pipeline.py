@@ -444,20 +444,20 @@ if __name__ == "__main__":
     source_file = "application1/topics/topics.json"
     source_branch = "main"
 
-    feature_file = "application1/topics/topics.json"
+    feature_file = "application1/connectors/connect-datagen-src.json"
     feature_branch = "test"
     source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
-    if "topic" in source_file and feature_file:
+    if "topic" in (source_file and feature_file):
         changed_topics = find_changed_topics(source_content, feature_content)
         process_changed_topics(changed_topics)
+
+    subprocess.run(['git','checkout', feature_branch]).stdout
+    latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
+    if latest_sha is not None:
+        output = subprocess.run(['git', 'diff', '--name-status', str(latest_sha)])
+        print(output.stdout)
     if "connector" in feature_file:
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
-        process_connector_changes(feature_file)
-        # since = datetime.now() - timedelta(days=1)
-        # commits = repo.get_commits(since=since)
-        # subprocess.run(['git', 'diff', '--name-status', ''])
-        # for commit in commits:
-        #     output = subprocess.run(['git', 'diff', '--name-status', commit.sha])
-        #     print(output.stdout)
+        # process_connector_changes(feature_file)
 
