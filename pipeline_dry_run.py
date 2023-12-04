@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_content_from_branches(source_file, source_branch, feature_file, feature_branch):
+def get_content_from_branches(repo, source_file, source_branch, feature_file, feature_branch):
     """
     Retrieve topic configurations from 'main' and 'test' branches of the Kafka Manager repository.
 
@@ -410,6 +410,8 @@ if __name__ == "__main__":
 
     feature_file = "application1/connectors/connect-datagen-src.json"
     feature_branch = "test"
+
+    repo = "NiyiOdumosu/kafkamanager"
     source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
     if "topic" in (source_file and feature_file):
         changed_topics = find_changed_topics(source_content, feature_content)
@@ -427,6 +429,6 @@ if __name__ == "__main__":
 
     if "connector" in feature_file:
         g = Github(GITHUB_TOKEN)
-        repo = g.get_repo("NiyiOdumosu/kafkamanager")
-        # process_connector_changes(feature_file)
+        repo = g.get_repo(repo)
+        process_connector_changes(feature_file)
 
