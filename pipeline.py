@@ -15,6 +15,8 @@ HEADERS = {'Content-type': 'application/json', 'Accept': 'application/json'}
 REST_PROXY_URL = os.getenv('REST_URL')
 CLUSTER_ID = os.getenv('KAFKA_CLUSTER_ID')
 CONNECT_REST_URL = os.getenv('CONNECT_REST_URL')
+BASIC_AUTH_USER = os.getenv('BASIC_AUTH_USER')
+BASIC_AUTH_PASS = os.getenv('BASIC_AUTH_PASS')
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -180,7 +182,7 @@ def add_new_topic(topic):
     rest_topic_url = build_topic_rest_url(REST_PROXY_URL, CLUSTER_ID)
     topic_json = json.dumps(topic)
 
-    response = requests.post(rest_topic_url, data=topic_json, headers=HEADERS)
+    response = requests.post(rest_topic_url, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS), data=topic_json, headers=HEADERS)
     if response.status_code == 201:
         logger.info(f"The topic {topic['topic_name']} has been successfully created")
     else:
@@ -205,7 +207,7 @@ def update_existing_topic(topic_name, topic_config):
     """
     rest_topic_url = build_topic_rest_url(REST_PROXY_URL, CLUSTER_ID)
     try:
-        response = requests.get(rest_topic_url + topic_name)
+        response = requests.get(rest_topic_url + topic_name, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS),)
     except Exception as e:
         logger.error(e)
 
@@ -216,7 +218,7 @@ def update_existing_topic(topic_name, topic_config):
     else:
         updated_Configs = "{\"data\":" + json.dumps(topic_config) + "}"
         logger.info("altering configs to " + updated_Configs)
-        response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", data=updated_Configs, headers=HEADERS)
+        response = requests.post(f"{rest_topic_url}{topic_name}" + "/configs:alter", auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS), data=updated_Configs, headers=HEADERS)
         logger.info("this is the code " + str(response.status_code) + " this is the reason: " + response.text)
 
 
@@ -245,6 +247,7 @@ def update_partition_count(current_topic_definition, rest_topic_url, partition_c
             logger.info(f"A requested increase of partitions for topic  {topic_name} is from "
                         f"{str(current_partitions_count)} to {str(new_partition_count)}")
             partition_response = requests.patch(f"{rest_topic_url}{topic_name}",
+                                                auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS),
                                                 data="{\"partitions_count\":" + str(new_partition_count) + "}")
             if partition_response.status_code != 200:
                 logger.info(
@@ -274,13 +277,13 @@ def delete_topic(topic_name):
     """
     rest_topic_url = build_topic_rest_url(REST_PROXY_URL, CLUSTER_ID)
 
-    get_response = requests.get(rest_topic_url + topic_name)
+    get_response = requests.get(rest_topic_url + topic_name, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS))
     if get_response.status_code == 200:
         logger.info(f"Response code is {str(get_response.status_code)}")
     else:
         logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
 
-    response = requests.delete(rest_topic_url + topic_name)
+    response = requests.delete(rest_topic_url + topic_name, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS))
     if response.status_code == 204:
             logger.info(f"The topic {topic_name} has been successfully deleted")
     else:
@@ -359,7 +362,7 @@ def add_new_acl(acl):
     rest_acl_url = build_acl_rest_url(REST_PROXY_URL, CLUSTER_ID)
     topic_json = json.dumps(acl)
 
-    response = requests.post(rest_acl_url, data=topic_json, headers=HEADERS)
+    response = requests.post(rest_acl_url, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS), data=topic_json, headers=HEADERS)
     if response.status_code == 201:
         logger.info(f"The acl {acl.keys()[0]} has been successfully created")
     else:
@@ -382,13 +385,13 @@ def delete_acl(acl):
     """
     rest_acl_url = build_acl_rest_url(REST_PROXY_URL, CLUSTER_ID)
 
-    get_response = requests.get(rest_acl_url + acl['topic_name'])
+    get_response = requests.get(rest_acl_url + acl['topic_name'], auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS))
     if get_response.status_code == 200:
         logger.info(f"Response code is {str(get_response.status_code)}")
     else:
         logger.error(f"Failed due to the following status code {str(get_response.status_code)} and reason {str(get_response.reason)}" )
 
-    response = requests.delete(rest_acl_url + acl['topic_name'])
+    response = requests.delete(rest_acl_url + acl['topic_name'], auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS))
     if response.status_code == 204:
         logger.info(f"The acl {acl.keys()[0]} has been successfully deleted")
     else:
