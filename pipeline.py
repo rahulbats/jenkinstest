@@ -321,12 +321,7 @@ def find_changed_acls(source_acls, feature_acls):
     for acl_name, source_acl in source_acls_dict.items():
         feature_acl = feature_acls_dict.get(acl_name)
         if not feature_acl:
-        #     diff = DeepDiff(source_acl, feature_acl, ignore_order=True)
-        #     if diff:
-        #         changed_acls.append({acl_name: diff, "type": "update"})
-        #         logger.info(f"The following acl will be updated : {acl_name}")
-        # else:
-        #     # ACL was removed
+            # ACL was removed
             changed_acls.append({acl_name: source_acls_dict.get(acl_name), "type": "removed"})
             logger.info(f"The following acl will be removed : {acl_name}")
 
@@ -386,7 +381,7 @@ def delete_acl(acl):
     """
     rest_acl_url = build_acl_rest_url(REST_PROXY_URL, CLUSTER_ID)
     response = requests.delete(rest_acl_url, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS), params=acl)
-    if response.status_code == 204:
+    if response.status_code == 200:
         logger.info(f"The acl {acl} has been successfully deleted")
     else:
         logger.error(f"The acl {acl} returned {str(response.status_code)} due to the following reason: {response.reason}")
