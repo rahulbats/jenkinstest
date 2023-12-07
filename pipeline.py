@@ -318,23 +318,23 @@ def find_changed_acls(source_acls, feature_acls):
 
     changed_acls = []
     # Check for changes and deletions
-    for topic_name, source_topic in source_acls_dict.items():
-        feature_topic = feature_acls_dict.get(topic_name)
-        if feature_topic:
-            diff = DeepDiff(source_topic, feature_topic, ignore_order=True)
+    for acl_name, source_acl in source_acls_dict.items():
+        feature_acl = feature_acls_dict.get(acl_name)
+        if feature_acl:
+            diff = DeepDiff(source_acl, feature_acl, ignore_order=True)
             if diff:
-                changed_acls.append({topic_name: diff, "type": "update"})
-                logger.info(f"The following topic will be updated : {topic_name}")
+                changed_acls.append({acl_name: diff, "type": "update"})
+                logger.info(f"The following acl will be updated : {acl_name}")
         else:
             # Topic was removed
-            changed_acls.append({topic_name: source_acls_dict.get(topic_name), "type": "removed"})
-            logger.info(f"The following topic will be removed : {topic_name}")
+            changed_acls.append({acl_name: source_acls_dict.get(acl_name), "type": "removed"})
+            logger.info(f"The following acl will be removed : {acl_name}")
 
     # Check for new additions
-    for topic_name in feature_acls_dict:
-        if topic_name not in source_acls_dict.keys():
-            changed_acls.append({topic_name: feature_acls_dict.get(topic_name), "type": "new"})
-            logger.info(f"The following topic will be added : {topic_name}")
+    for acl_name in feature_acls_dict:
+        if acl_name not in source_acls_dict.keys():
+            changed_acls.append({acl_name: feature_acls_dict.get(acl_name), "type": "new"})
+            logger.info(f"The following acl will be added : {acl_name}")
     return changed_acls
 
 
@@ -456,7 +456,7 @@ if __name__ == "__main__":
 
     if "acl" in (source_file and feature_file):
         changed_acls = find_changed_acls(source_content, feature_content)
-        process_changed_acls(changed_topics)
+        process_changed_acls(changed_acls)
 
     subprocess.run(['git', 'checkout', feature_branch]).stdout
     latest_sha = subprocess.run(['git', 'rev-parse', 'HEAD']).stdout
