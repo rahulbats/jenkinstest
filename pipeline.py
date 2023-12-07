@@ -1,13 +1,14 @@
 from github import Github
 from deepdiff import DeepDiff
 
+# import click
+import json
 import logging
 import os
-import requests
-import json
-import re
 import string
 import subprocess
+import re
+import requests
 
 # Constant variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -440,13 +441,13 @@ def process_connector_changes(connector_file):
     else:
         logger.error(f"The connector {connector_name} returned {str(response.status_code)} due to the following reason: {response.text}")
 
-
+# @click.command()
 if __name__ == "__main__":
 
-    source_file = "application1/topics/topics.json"
+    source_file = "application1/acls/acls.json"
     source_branch = "main"
 
-    feature_file = "application1/connectors/connect-datagen-src.json"
+    feature_file = "application1/acls/acls.json"
     feature_branch = "test"
     source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
     if "topic" in (source_file and feature_file):
