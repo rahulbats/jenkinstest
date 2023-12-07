@@ -1,0 +1,7 @@
+venv/
+pyvenv.cfg
+.idea/*
+.ipynb_checkpoints/*
+bin/*
+lib/*
+.DS_Store
