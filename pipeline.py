@@ -1,7 +1,7 @@
 from github import Github
 from deepdiff import DeepDiff
 
-# import click
+import click
 import json
 import logging
 import os
@@ -425,14 +425,13 @@ def process_connector_changes(connector_file):
         logger.error(f"The connector {connector_name} returned {str(response.status_code)} due to the following reason: {response.text}")
 
 
-# @click.command()
-if __name__ == "__main__":
+@click.command()
+@click.argument('source_file')
+@click.argument('source_branch')
+@click.argument('feature_file')
+@click.argument('feature_branch')
+def main(source_file, source_branch, feature_file, feature_branch):
 
-    source_file = "application1/acls/acls.json"
-    source_branch = "main"
-
-    feature_file = "application1/acls/acls.json"
-    feature_branch = "test"
     source_content, feature_content = get_content_from_branches(source_file, source_branch, feature_file, feature_branch)
     if "topic" in (source_file and feature_file):
         changed_topics = find_changed_topics(source_content, feature_content)
@@ -453,3 +452,6 @@ if __name__ == "__main__":
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
         # process_connector_changes(feature_file)
 
+
+if __name__ == '__main__':
+    main()
