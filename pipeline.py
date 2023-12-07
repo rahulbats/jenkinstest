@@ -1,5 +1,6 @@
 from github import Github
 from deepdiff import DeepDiff
+from datetime import datetime
 
 import click
 import json
@@ -359,10 +360,13 @@ def add_new_acl(acl):
     acl_json = json.dumps(acl)
     print(acl_json)
     response = requests.post(rest_acl_url, auth=(BASIC_AUTH_USER, BASIC_AUTH_PASS), data=acl_json, headers=HEADERS)
-    if response.status_code == 201:
-        logger.info(f"The acl {acl_json} has been successfully created")
-    else:
-        logger.error(f"The topic {acl.keys()[0]} returned {str(response.status_code)} due to the follwing reason: {response.reason}")
+    with open('CHANGELOG.md', 'w') as f:
+        if response.status_code == 201:
+            logger.info(f"The acl {acl_json} has been successfully created")
+            f.write(f"{datetime.now()} - {acl_json} has been successfully created")
+        else:
+            logger.error(f"The acl {acl_json} returned {str(response.status_code)} due to the follwing reason: {response.reason}")
+            f.write(f"{datetime.now()} - {acl_json} attempted to be created but was unsuccessful. REST API returned {str(response.status_code)} due to the follwing reason: {response.reason}")
 
 
 def delete_acl(acl):
@@ -389,7 +393,6 @@ def delete_acl(acl):
 
 def add_or_remove_acls(changed_acls):
     for i, topic in enumerate(changed_acls):
-        acl_name = list(topic.keys())[i]
         acl_configs = list(topic.values())[i]
         if topic['type'] == 'new':
             add_new_acl(acl_configs)
