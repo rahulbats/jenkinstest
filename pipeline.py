@@ -41,10 +41,10 @@ def get_content_from_branches(source_file, source_branch, feature_file, feature_
     try:
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo("NiyiOdumosu/kafkamanager")
-        feature_topic_content = repo.get_contents(feature_file, ref=feature_branch)
-        source_topic_content = repo.get_contents(source_file, ref=source_branch)
-        source_topics = json.loads(source_topic_content.decoded_content)
-        feature_topics = json.loads(feature_topic_content.decoded_content)
+        feature_branch_content = repo.get_contents(feature_file, ref=feature_branch)
+        source_branch_content = repo.get_contents(source_file, ref=source_branch)
+        source_topics = json.loads(source_branch_content.decoded_content)
+        feature_topics = json.loads(feature_branch_content.decoded_content)
 
         return source_topics, feature_topics
     except Exception as e:
@@ -321,7 +321,12 @@ def find_changed_acls(source_acls, feature_acls):
     for acl_name, source_acl in source_acls_dict.items():
         feature_acl = feature_acls_dict.get(acl_name)
         if not feature_acl:
-            # ACL was removed
+        #     diff = DeepDiff(source_acl, feature_acl, ignore_order=True)
+        #     if diff:
+        #         changed_acls.append({acl_name: diff, "type": "update"})
+        #         logger.info(f"The following acl will be updated : {acl_name}")
+        # else:
+        #     # ACL was removed
             changed_acls.append({acl_name: source_acls_dict.get(acl_name), "type": "removed"})
             logger.info(f"The following acl will be removed : {acl_name}")
 
